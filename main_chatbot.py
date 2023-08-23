@@ -38,13 +38,19 @@ def add_answer(question_id, answer):
 
 # 한 질문에 대한 랜덤한 답변을 반환
 def get_random_answer(question):
-    c.execute("SELECT id FROM questions WHERE question=?", (question,))
-    question_id = c.fetchone()
-    if question_id:
-        c.execute("SELECT answer FROM answers WHERE question_id=?", (question_id[0],))
-        results = c.fetchall()
-        if results:
-            return random.choice(results)[0]
+    c.execute("SELECT id, question FROM questions")
+    all_questions = c.fetchall()
+    
+    matching_answers = []
+    for q_id, q_text in all_questions:
+        if q_text in question:
+            c.execute("SELECT answer FROM answers WHERE question_id=?", (q_id,))
+            results = c.fetchall()
+            if results:
+                matching_answers.extend(results)
+    
+    if matching_answers:
+        return random.choice(matching_answers)[0]
 
     return "미안해요, 그 질문에 대한 답변을 알지 못해요."
 
